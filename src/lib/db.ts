@@ -63,36 +63,69 @@ export async function seedDatabase() {
   if (productCount === 0) {
     await db.products.bulkAdd([
       {
-        name: 'Air Max 270',
+        name: 'Nike Air Max 270 React',
         brand: 'Nike',
         category: 'Running',
-        price: 1500000,
-        stock: 10,
+        price: 1850000,
+        stock: 12,
         size: '42',
-        sku: 'NK-AM270-42',
-        imageUrl: 'https://picsum.photos/seed/nike1/400/400',
+        sku: 'NK-AM270-RD',
+        imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=1000',
         createdAt: Date.now()
       },
       {
-        name: 'Ultraboost 22',
+        name: 'Adidas Ultraboost 22 Black',
         brand: 'Adidas',
         category: 'Running',
-        price: 1800000,
-        stock: 15,
-        size: '41',
-        sku: 'AD-UB22-41',
-        imageUrl: 'https://picsum.photos/seed/adidas1/400/400',
+        price: 2400000,
+        stock: 8,
+        size: '43',
+        sku: 'AD-UB22-BK',
+        imageUrl: 'https://images.unsplash.com/photo-1491553895911-0055eca6402d?auto=format&fit=crop&q=80&w=1000',
         createdAt: Date.now()
       },
       {
-        name: 'Old Skool',
+        name: 'Vans Old Skool Classic',
         brand: 'Vans',
         category: 'Casual',
-        price: 800000,
-        stock: 20,
+        price: 950000,
+        stock: 25,
         size: '40',
-        sku: 'VN-OS-40',
-        imageUrl: 'https://picsum.photos/seed/vans1/400/400',
+        sku: 'VN-OS-CL',
+        imageUrl: 'https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?auto=format&fit=crop&q=80&w=1000',
+        createdAt: Date.now()
+      },
+      {
+        name: 'Air Jordan 1 Retro High',
+        brand: 'Nike',
+        category: 'Basketball',
+        price: 2800000,
+        stock: 5,
+        size: '44',
+        sku: 'NK-AJ1-RED',
+        imageUrl: 'https://images.unsplash.com/photo-1584735175315-9d5df23860e6?auto=format&fit=crop&q=80&w=1000',
+        createdAt: Date.now()
+      },
+      {
+        name: 'New Balance 574 Grey',
+        brand: 'New Balance',
+        category: 'Casual',
+        price: 1450000,
+        stock: 15,
+        size: '42',
+        sku: 'NB-574-GR',
+        imageUrl: 'https://images.unsplash.com/photo-1539185441755-769473a23a50?auto=format&fit=crop&q=80&w=1000',
+        createdAt: Date.now()
+      },
+      {
+        name: 'Chuck Taylor All Star',
+        brand: 'Converse',
+        category: 'Casual',
+        price: 750000,
+        stock: 30,
+        size: '41',
+        sku: 'CV-CT-WH',
+        imageUrl: 'https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&q=80&w=1000',
         createdAt: Date.now()
       }
     ]);

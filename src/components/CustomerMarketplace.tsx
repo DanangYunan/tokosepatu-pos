@@ -74,32 +74,55 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
 
   const cartTotal = cart.reduce((acc, curr) => acc + curr.subtotal, 0);
 
+  const handleWhatsAppCheckout = () => {
+    if (cart.length === 0) return;
+
+    const phoneNumber = "6282133445566"; // Ganti dengan nomor WhatsApp admin Anda
+    const message = `Halo SoleFlow! Saya ingin memesan sepatu berikut:
+
+*Detail Pesanan:*
+${cart.map((item, index) => `${index + 1}. ${item.name} (${item.quantity}x) - ${formatCurrency(item.subtotal)}`).join('\n')}
+
+*Total Pembayaran: ${formatCurrency(cartTotal)}*
+
+Nama Pemesan: ${user.name}
+Email: ${user.email}
+
+Terima kasih!`;
+
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+    window.open(whatsappUrl, '_blank');
+  };
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 font-sans">
+    <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-indigo-100 selection:text-indigo-900">
       {/* Top Banner */}
-      <div className="bg-indigo-600 text-white py-2 px-4 text-center text-xs font-bold tracking-widest uppercase">
-        Gratis Ongkir Seluruh Indonesia • S&K Berlaku
+      <div className="bg-slate-950 text-white py-2.5 px-4 text-center text-[10px] font-extrabold tracking-[0.2em] uppercase">
+        Pengiriman Kilat ke Seluruh Indonesia • Dapatkan Cashback s/d 10%
       </div>
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100">
+      <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-xl border-b border-slate-100/50">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-8">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+          <div className="flex items-center gap-12">
+            <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setSelectedCategory('Semua')}>
+              <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-lg shadow-indigo-200">
                 <ShoppingBag className="text-white w-5 h-5" />
               </div>
-              <span className="font-black text-2xl tracking-tighter">SOLEFLOW</span>
+              <span className="font-extrabold text-2xl tracking-tighter">SOLEFLOW.</span>
             </div>
             
-            <div className="hidden md:flex items-center gap-6">
+            <div className="hidden lg:flex items-center gap-8">
               {categories.map(cat => (
                 <button 
                   key={cat}
                   onClick={() => setSelectedCategory(cat)}
                   className={cn(
-                    "text-sm font-bold uppercase tracking-widest transition-colors",
-                    selectedCategory === cat ? "text-indigo-600" : "text-slate-400 hover:text-slate-900"
+                    "text-[11px] font-black uppercase tracking-[0.15em] transition-all relative py-2",
+                    selectedCategory === cat 
+                      ? "text-indigo-600 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-indigo-600" 
+                      : "text-slate-400 hover:text-slate-900"
                   )}
                 >
                   {cat}
@@ -108,41 +131,41 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="relative hidden lg:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <div className="flex items-center gap-6">
+            <div className="relative hidden xl:block group">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
               <input 
                 type="text" 
-                placeholder="Cari sepatu impian..." 
+                placeholder="Cari koleksi terbaik..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm w-64 focus:ring-2 focus:ring-indigo-500/20 outline-none"
+                className="pl-12 pr-6 py-3 bg-slate-100 border-2 border-transparent rounded-2xl text-xs w-72 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
               />
             </div>
             
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative p-2 text-slate-700 hover:bg-slate-100 rounded-full transition-colors"
+              className="relative p-3 text-slate-700 hover:bg-slate-100 rounded-2xl transition-all group"
             >
-              <ShoppingBag className="w-6 h-6" />
+              <ShoppingBag className="w-6 h-6 group-hover:scale-110 transition-transform" />
               {cart.length > 0 && (
-                <span className="absolute top-0 right-0 w-5 h-5 bg-indigo-600 text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                <span className="absolute -top-1 -right-1 w-6 h-6 bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center rounded-xl border-2 border-white shadow-lg">
                   {cart.length}
                 </span>
               )}
             </button>
 
-            <div className="flex items-center gap-3 pl-4 border-l border-slate-100">
+            <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-bold text-slate-900">{user.name}</p>
+                <p className="text-[11px] font-black text-slate-900 leading-tight">{user.name.toUpperCase()}</p>
                 <button 
                   onClick={onLogout}
-                  className="text-[10px] font-bold text-red-500 uppercase tracking-widest hover:underline"
+                  className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors"
                 >
-                  Keluar
+                  Sign Out
                 </button>
               </div>
-              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-slate-700 font-bold border border-slate-200">
+              <div className="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center text-slate-800 font-black border border-white shadow-sm overflow-hidden ring-2 ring-slate-50">
                 {user.name.charAt(0)}
               </div>
             </div>
@@ -151,187 +174,243 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-[80vh] flex items-center overflow-hidden bg-slate-900">
-        <div className="absolute inset-0 opacity-40">
+      <section className="relative h-[90vh] flex items-center overflow-hidden">
+        <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=2070" 
-            alt="Hero" 
-            className="w-full h-full object-cover"
+            alt="Hero Background" 
+            className="w-full h-full object-cover scale-105"
             referrerPolicy="no-referrer"
           />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
         </div>
-        <div className="relative max-w-7xl mx-auto px-6 w-full">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl"
-          >
-            <span className="inline-block text-indigo-400 font-bold tracking-[0.3em] uppercase mb-4">New Collection 2024</span>
-            <h1 className="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8">
-              STEP INTO THE <br/> <span className="text-indigo-500 italic">FUTURE.</span>
-            </h1>
-            <p className="text-slate-300 text-lg mb-10 max-w-lg">
-              Temukan koleksi sepatu terbaik dari brand ternama dunia. Kenyamanan maksimal dengan gaya yang tak tertandingi.
-            </p>
-            <button className="group flex items-center gap-4 bg-white text-slate-900 px-8 py-4 rounded-full font-bold text-lg hover:bg-indigo-600 hover:text-white transition-all">
-              Belanja Sekarang
-              <ArrowRight className="w-5 h-5 group-hover:translate-x-2 transition-transform" />
-            </button>
-          </motion.div>
+        
+        <div className="relative z-10 max-w-7xl mx-auto px-6 w-full">
+          <div className="max-w-3xl">
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[10px] font-black tracking-[0.3em] uppercase mb-8">
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
+                Limited Edition Drop
+              </span>
+              <h1 className="text-7xl md:text-[10rem] font-extrabold text-white leading-[0.8] tracking-[-0.05em] mb-10">
+                ULTIMATE <br/> <span className="text-indigo-500 italic">STYLE.</span>
+              </h1>
+              <p className="text-slate-300 text-lg md:text-xl mb-12 max-w-xl leading-relaxed font-medium">
+                Melangkah dengan penuh percaya diri. Koleksi eksklusif SoleFlow hadir untuk mendefinisikan jati diri Anda melalui kenyamanan premium.
+              </p>
+              <div className="flex flex-wrap gap-6">
+                <button 
+                  onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="group flex items-center gap-4 bg-white text-slate-950 px-10 py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-2xl shadow-indigo-500/10"
+                >
+                  Explore Collection
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                </button>
+                <div className="flex items-center gap-4">
+                  <div className="flex -space-x-4">
+                    {[1, 2, 3].map(i => (
+                      <div key={i} className="w-12 h-12 rounded-2xl border-4 border-slate-950 bg-slate-800 flex items-center justify-center overflow-hidden">
+                        <img src={`https://picsum.photos/seed/user${i}/100/100`} alt="user" className="w-full h-full object-cover opacity-80" />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="text-slate-400 text-xs font-bold leading-tight">
+                    <span className="text-white">5k+ People</span> <br/> 
+                    Trusted Our Shoes
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* Features */}
-      <section className="py-16 border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+      {/* Features - Premium Look */}
+      <section className="py-20 bg-slate-50/50">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {[
-            { icon: Truck, title: 'Gratis Ongkir', desc: 'Seluruh Indonesia' },
-            { icon: RotateCcw, title: '14 Hari Retur', desc: 'Garansi uang kembali' },
-            { icon: ShieldCheck, title: '100% Original', desc: 'Produk resmi & asli' },
-            { icon: Star, title: 'Premium Quality', desc: 'Material terbaik' },
+            { icon: Truck, title: 'Express Logistics', desc: 'Pengiriman instan & terlacak' },
+            { icon: RotateCcw, title: 'Safe Returns', desc: 'Hassle-free 14 hari retur' },
+            { icon: ShieldCheck, title: 'Authenticity Guarantee', desc: 'Cek verifikasi keaslian' },
+            { icon: Star, title: 'Elite Loyalty', desc: 'Member exclusive rewards' },
           ].map((f, i) => (
-            <div key={i} className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1 }}
+              key={i} 
+              className="group p-8 bg-white rounded-[2rem] border border-slate-100 hover:border-indigo-100 hover:shadow-xl hover:shadow-indigo-500/5 transition-all"
+            >
+              <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 mb-6 group-hover:rotate-6 shadow-sm">
                 <f.icon className="w-6 h-6" />
               </div>
-              <div>
-                <h4 className="font-bold text-sm">{f.title}</h4>
-                <p className="text-xs text-slate-500">{f.desc}</p>
-              </div>
-            </div>
+              <h4 className="font-black text-xs uppercase tracking-widest mb-2">{f.title}</h4>
+              <p className="text-xs text-slate-500 font-medium leading-relaxed">{f.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
       {/* Product Grid */}
-      <section className="py-24 max-w-7xl mx-auto px-6">
-        <div className="flex items-end justify-between mb-12">
-          <div>
-            <h2 className="text-4xl font-black tracking-tight mb-2">KOLEKSI TERBARU</h2>
-            <p className="text-slate-500">Pilihan terbaik untuk gaya hidup aktif Anda.</p>
+      <section id="collection" className="py-32 max-w-7xl mx-auto px-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-20">
+          <div className="max-w-xl">
+            <span className="text-indigo-600 font-black text-[10px] tracking-[0.4em] uppercase mb-4 block">Curated Selection</span>
+            <h2 className="text-5xl md:text-6xl font-extrabold tracking-tight mb-6">NEW RELEASES.</h2>
+            <p className="text-slate-500 text-lg leading-relaxed font-medium">
+              Edisi terbatas yang dirancang khusus untuk performa tinggi dan gaya hidup urban yang dinamis.
+            </p>
           </div>
-          <div className="hidden md:flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-400">Menampilkan {filteredProducts?.length} Produk</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] border border-slate-100 px-6 py-3 rounded-2xl">
+              Results: {filteredProducts?.length} Models
+            </span>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-10 gap-y-16">
           {filteredProducts?.map((product) => (
             <motion.div 
               layout
               key={product.id} 
               className="group"
             >
-              <div className="relative aspect-[4/5] bg-slate-100 rounded-3xl overflow-hidden mb-6">
+              <div className="relative aspect-[3/4] bg-slate-100 rounded-[2.5rem] overflow-hidden mb-8 shadow-sm">
                 <img 
                   src={product.imageUrl} 
                   alt={product.name} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
                   referrerPolicy="no-referrer"
                 />
-                <div className="absolute top-4 left-4">
-                  <span className="bg-white/90 backdrop-blur px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                <div className="absolute inset-0 bg-slate-950/0 group-hover:bg-slate-950/20 transition-all duration-500" />
+                
+                <div className="absolute top-6 left-6">
+                  <span className="bg-white/95 backdrop-blur-xl px-4 py-2 rounded-2xl text-[9px] font-black uppercase tracking-[0.2em] shadow-xl">
                     {product.brand}
                   </span>
                 </div>
+                
                 <button 
                   onClick={() => addToCart(product)}
-                  className="absolute bottom-4 left-4 right-4 bg-slate-900 text-white py-4 rounded-2xl font-bold translate-y-12 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300"
+                  className="absolute bottom-8 left-8 right-8 bg-white text-slate-950 py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-[400ms] shadow-2xl hover:bg-slate-950 hover:text-white"
                 >
-                  Tambah ke Keranjang
+                  Add to Cart
                 </button>
               </div>
-              <div className="space-y-1">
-                <div className="flex justify-between items-start">
-                  <h3 className="font-bold text-lg group-hover:text-indigo-600 transition-colors">{product.name}</h3>
-                  <div className="flex items-center gap-1 text-amber-500">
+              
+              <div className="px-2 space-y-3">
+                <div className="flex justify-between items-start gap-4">
+                  <h3 className="font-extrabold text-lg text-slate-900 leading-tight group-hover:text-indigo-600 transition-colors uppercase italic">{product.name}</h3>
+                  <div className="flex items-center gap-1.5 px-3 py-1 bg-amber-50 rounded-full text-amber-600 border border-amber-100/50">
                     <Star className="w-3 h-3 fill-current" />
-                    <span className="text-xs font-bold">4.8</span>
+                    <span className="text-[10px] font-black">4.8</span>
                   </div>
                 </div>
-                <p className="text-slate-500 text-sm">{product.category} • Size {product.size}</p>
-                <p className="text-xl font-black text-slate-900 mt-2">{formatCurrency(product.price)}</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{product.category}</span>
+                  <div className="w-1 h-1 rounded-full bg-slate-200" />
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-xs">Size {product.size}</span>
+                </div>
+                <p className="text-2xl font-black text-slate-950 tracking-tight">{formatCurrency(product.price)}</p>
               </div>
             </motion.div>
           ))}
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="bg-slate-50 py-24">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-black tracking-tight mb-4">DAPATKAN DISKON 15%</h2>
-          <p className="text-slate-500 mb-10">Berlangganan newsletter kami dan jadilah yang pertama tahu tentang koleksi terbaru dan promo eksklusif.</p>
-          <div className="flex flex-col sm:flex-row gap-4">
+      {/* Newsletter - Premium Design */}
+      <section className="bg-slate-950 py-32 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-1/3 h-full bg-indigo-600/10 blur-[120px] rounded-full" />
+        <div className="absolute bottom-0 left-0 w-1/3 h-full bg-indigo-600/5 blur-[120px] rounded-full" />
+        
+        <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+          <span className="text-indigo-500 font-black text-[10px] tracking-[0.4em] uppercase mb-6 block">Join the Circle</span>
+          <h2 className="text-5xl md:text-7xl font-extrabold text-white tracking-tighter mb-6 leading-tight">BECOME AN INSIDER.</h2>
+          <p className="text-slate-400 text-lg md:text-xl mb-12 max-w-2xl mx-auto font-medium">
+            Dapatkan akses awal ke drop terbaru, konten eksklusif, dan penawaran khusus member.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto p-2 bg-slate-900 rounded-[2.5rem] border border-slate-800">
             <input 
               type="email" 
-              placeholder="Alamat email Anda" 
-              className="flex-1 px-8 py-4 rounded-full bg-white border border-slate-200 outline-none focus:ring-2 focus:ring-indigo-500/20"
+              placeholder="Enter your email address" 
+              className="flex-1 px-8 py-5 bg-transparent text-white outline-none font-medium placeholder:text-slate-600"
             />
-            <button className="bg-indigo-600 text-white px-10 py-4 rounded-full font-bold hover:bg-indigo-700 transition-all">
-              Daftar Sekarang
+            <button className="bg-white text-slate-950 px-10 py-5 rounded-[2rem] font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all">
+              Subscribe Now
             </button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white pt-24 pb-12 border-t border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-          <div className="col-span-1 md:col-span-1">
-            <div className="flex items-center gap-2 mb-6">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+      <footer className="bg-white pt-32 pb-16">
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-16 mb-24">
+          <div className="lg:col-span-4">
+            <div className="flex items-center gap-2 mb-8 scale-110 origin-left">
+              <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center -rotate-6 shadow-lg shadow-indigo-200">
                 <ShoppingBag className="text-white w-5 h-5" />
               </div>
-              <span className="font-black text-2xl tracking-tighter">SOLEFLOW</span>
+              <span className="font-extrabold text-2xl tracking-tighter">SOLEFLOW.</span>
             </div>
-            <p className="text-slate-500 text-sm leading-relaxed">
-              Toko sepatu online terpercaya dengan koleksi terlengkap dan kualitas premium. Melangkah lebih jauh bersama SoleFlow.
+            <p className="text-slate-500 text-lg leading-relaxed font-medium mb-10">
+              Membangun masa depan persepatuan. Kami tidak hanya menjual sepatu, kami memberikan pengalaman melangkah yang lebih baik melalui inovasi dan desain premium.
             </p>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs">Belanja</h4>
-            <ul className="space-y-4 text-sm text-slate-500">
-              <li><a href="#" className="hover:text-indigo-600">Semua Produk</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Running Shoes</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Casual Shoes</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Basketball Shoes</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs">Bantuan</h4>
-            <ul className="space-y-4 text-sm text-slate-500">
-              <li><a href="#" className="hover:text-indigo-600">Status Pesanan</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Pengiriman</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Kebijakan Retur</a></li>
-              <li><a href="#" className="hover:text-indigo-600">Hubungi Kami</a></li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-bold mb-6 uppercase tracking-widest text-xs">Ikuti Kami</h4>
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all cursor-pointer">
-                <span className="font-bold">Ig</span>
-              </div>
-              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all cursor-pointer">
-                <span className="font-bold">Tw</span>
-              </div>
-              <div className="w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all cursor-pointer">
-                <span className="font-bold">Fb</span>
-              </div>
+              {['Ig', 'Tw', 'In', 'Fb'].map(social => (
+                <div key={social} className="w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-[10px] font-black text-slate-400 hover:bg-indigo-600 hover:text-white transition-all cursor-pointer border border-slate-100 shadow-sm">
+                  {social}
+                </div>
+              ))}
             </div>
+          </div>
+          
+          <div className="lg:col-span-2">
+            <h4 className="font-black mb-8 uppercase tracking-[0.2em] text-[10px] text-slate-400">Shop</h4>
+            <ul className="space-y-5 text-sm font-bold text-slate-600">
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Men Collection</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Women Collection</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Limited Drops</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Sale Store</a></li>
+            </ul>
+          </div>
+          
+          <div className="lg:col-span-2">
+            <h4 className="font-black mb-8 uppercase tracking-[0.2em] text-[10px] text-slate-400">Information</h4>
+            <ul className="space-y-5 text-sm font-bold text-slate-600">
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Shipping</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Order Status</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Refund Policy</a></li>
+              <li><a href="#" className="hover:text-indigo-600 transition-colors">Terms of Work</a></li>
+            </ul>
+          </div>
+
+          <div className="lg:col-span-4 bg-slate-50 p-10 rounded-[2.5rem] border border-slate-100">
+            <h4 className="font-black mb-6 uppercase tracking-[0.2em] text-[10px] text-slate-900">Headquarters</h4>
+            <p className="text-slate-500 font-medium text-sm leading-loose mb-8">
+              SCBD District 8, Jakarta Selatan <br/>
+              Indonesia 12190 <br/>
+              contact@soleflow.id
+            </p>
+            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">+62 21 8888 9999</p>
           </div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
-          <p className="text-slate-400 text-xs">© 2024 SoleFlow Indonesia. All rights reserved.</p>
-          <div className="flex gap-8 text-slate-400 text-xs">
-            <a href="#" className="hover:text-slate-900">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-900">Terms of Service</a>
+        
+        <div className="max-w-7xl mx-auto px-6 pt-12 border-t border-slate-100 flex flex-col md:flex-row justify-between items-center gap-8">
+          <p className="text-slate-400 text-[10px] font-bold tracking-widest uppercase">© 2024 SoleFlow Indonesia. Handcrafted with Precision.</p>
+          <div className="flex gap-10 text-slate-400 text-[10px] font-bold tracking-widest uppercase">
+            <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">Cookies</a>
+            <a href="#" className="hover:text-indigo-600 transition-colors">Legal</a>
           </div>
         </div>
       </footer>
 
-      {/* Cart Drawer */}
+      {/* Cart Drawer - Premium UI */}
       <AnimatePresence>
         {isCartOpen && (
           <>
@@ -340,77 +419,125 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsCartOpen(false)}
-              className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50"
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-md z-[100]"
             />
             <motion.div 
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col"
+              transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+              className="fixed top-0 right-0 h-full w-full max-w-xl bg-white z-[110] shadow-[-20px_0_50px_rgba(0,0,0,0.1)] flex flex-col"
             >
-              <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <ShoppingBag className="w-6 h-6 text-indigo-600" />
-                  <h3 className="font-black text-xl tracking-tight">KERANJANG</h3>
+              <div className="p-10 border-b border-slate-100 flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-indigo-50 rounded-2xl flex items-center justify-center text-indigo-600">
+                    <ShoppingBag className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-black text-2xl tracking-tighter uppercase italic">My Cart</h3>
+                    <p className="text-slate-400 text-[10px] font-bold tracking-widest uppercase">{cart.length} Items Selected</p>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setIsCartOpen(false)}
-                  className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                  className="p-3 hover:bg-slate-100 rounded-2xl transition-all group"
                 >
-                  <X className="w-6 h-6" />
+                  <X className="w-6 h-6 group-hover:rotate-90 transition-transform" />
                 </button>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="flex-1 overflow-y-auto p-10 space-y-10">
                 {cart.map(item => (
-                  <div key={item.productId} className="flex gap-4">
-                    <div className="w-24 h-24 bg-slate-100 rounded-2xl overflow-hidden flex-shrink-0">
+                  <motion.div 
+                    layout
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    key={item.productId} 
+                    className="flex gap-8 group"
+                  >
+                    <div className="w-32 h-40 bg-slate-100 rounded-[2rem] overflow-hidden flex-shrink-0 shadow-inner">
                       <img 
                         src={products?.find(p => p.id === item.productId)?.imageUrl} 
                         alt={item.name} 
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         referrerPolicy="no-referrer"
                       />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 truncate">{item.name}</h4>
-                      <p className="text-sm text-slate-500 mb-3">{formatCurrency(item.price)}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 bg-slate-100 rounded-full px-4 py-1.5">
-                          <button onClick={() => updateQuantity(item.productId, -1)} className="p-1 hover:text-indigo-600"><Minus className="w-3 h-3"/></button>
-                          <span className="text-sm font-bold">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productId, 1)} className="p-1 hover:text-indigo-600"><Plus className="w-3 h-3"/></button>
+                    <div className="flex-1 min-w-0 flex flex-col justify-between py-2">
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-start gap-4">
+                          <h4 className="font-extrabold text-xl text-slate-950 leading-tight truncate uppercase italic">{item.name}</h4>
+                          <button onClick={() => updateQuantity(item.productId, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5"/></button>
                         </div>
-                        <button onClick={() => updateQuantity(item.productId, -item.quantity)} className="text-slate-400 hover:text-red-500"><Trash2 className="w-4 h-4"/></button>
+                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{products?.find(p => p.id === item.productId)?.brand}</p>
+                        <p className="text-lg font-black text-indigo-600 mt-2">{formatCurrency(item.price)}</p>
+                      </div>
+                      <div className="flex items-center justify-between mt-6 bg-slate-50 p-2 rounded-2xl">
+                        <div className="flex items-center gap-6 px-4">
+                          <button onClick={() => updateQuantity(item.productId, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
+                            <Minus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
+                          </button>
+                          <span className="text-sm font-black w-4 text-center">{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.productId, 1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
+                            <Plus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
+                          </button>
+                        </div>
+                        <span className="text-sm font-black pr-4 text-slate-400">SUBTOTAL: {formatCurrency(item.subtotal)}</span>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
+                
                 {cart.length === 0 && (
                   <div className="h-full flex flex-col items-center justify-center text-center py-20">
-                    <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-6">
-                      <ShoppingBag className="w-10 h-10 text-slate-200" />
+                    <div className="w-32 h-32 bg-slate-50 rounded-[2.5rem] flex items-center justify-center mb-10 rotate-3">
+                      <ShoppingBag className="w-16 h-16 text-slate-200" />
                     </div>
-                    <p className="text-slate-400 font-medium">Keranjang Anda kosong.<br/>Mulai belanja sekarang!</p>
+                    <h5 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tighter italic">Your bag is empty</h5>
+                    <p className="text-slate-400 text-sm font-medium leading-relaxed max-w-xs mx-auto">
+                      Sepertinya Anda belum menemukan sepatu impian. Jelajahi koleksi kami sekarang!
+                    </p>
+                    <button 
+                      onClick={() => setIsCartOpen(false)}
+                      className="mt-10 px-10 py-5 bg-indigo-600 text-white rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-slate-950 transition-all shadow-xl shadow-indigo-200"
+                    >
+                      Start Shopping
+                    </button>
                   </div>
                 )}
               </div>
 
-              <div className="p-8 bg-slate-50 border-t border-slate-100 space-y-6">
-                <div className="flex justify-between items-end">
-                  <span className="text-slate-500 font-bold uppercase tracking-widest text-xs">Total Pembayaran</span>
-                  <span className="text-3xl font-black text-indigo-600">{formatCurrency(cartTotal)}</span>
+              <div className="p-10 bg-slate-950 text-white space-y-10">
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center text-slate-500 font-bold uppercase tracking-[0.2em] text-[10px]">
+                    <span>Order Subtotal</span>
+                    <span>{formatCurrency(cartTotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-emerald-500 font-bold uppercase tracking-[0.2em] text-[10px]">
+                    <span>Shipping Fee</span>
+                    <span>FREE</span>
+                  </div>
+                  <div className="h-px bg-slate-900 w-full" />
+                  <div className="flex justify-between items-end pt-2">
+                    <span className="text-slate-400 font-black uppercase tracking-widest text-[11px]">Estimate Total</span>
+                    <span className="text-5xl font-extrabold tracking-tighter italic">{formatCurrency(cartTotal)}</span>
+                  </div>
                 </div>
+                
                 <button 
                   disabled={cart.length === 0}
-                  className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold text-lg hover:bg-indigo-600 transition-all shadow-xl disabled:bg-slate-300 disabled:cursor-not-allowed"
+                  onClick={handleWhatsAppCheckout}
+                  className="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-slate-950 transition-all disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed shadow-[0_20px_50px_rgba(79,70,229,0.3)]"
                 >
-                  Checkout Sekarang
+                  Checkout via WhatsApp
                 </button>
-                <p className="text-[10px] text-center text-slate-400 uppercase tracking-widest font-bold">
-                  Pembayaran Aman & Terenkripsi
-                </p>
+                
+                <div className="flex items-center justify-center gap-2 opacity-30">
+                  <ShieldCheck className="w-3 h-3" />
+                  <p className="text-[9px] uppercase tracking-widest font-black">
+                    Secured by SoleFlow Advanced Security
+                  </p>
+                </div>
               </div>
             </motion.div>
           </>

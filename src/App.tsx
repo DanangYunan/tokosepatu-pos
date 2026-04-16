@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import ProductManagement from './components/ProductManagement';
 import POS from './components/POS';
 import TransactionHistory from './components/TransactionHistory';
+import Reports from './components/Reports';
 import CustomerMarketplace from './components/CustomerMarketplace';
 import Auth from './components/Auth';
 import { seedDatabase, type User } from './lib/db';
@@ -60,6 +61,8 @@ export default function App() {
         return <POS />;
       case 'history':
         return <TransactionHistory />;
+      case 'reports':
+        return <Reports />;
       default:
         return <Dashboard />;
     }

@@ -56,135 +56,185 @@ export default function Auth({ onLogin }: AuthProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-200 mb-6">
-            <ShoppingBag className="text-white w-8 h-8" />
-          </div>
-          <h1 className="text-3xl font-black tracking-tight text-slate-900">SOLEFLOW</h1>
-          <p className="text-slate-500 mt-2">Melangkah lebih jauh dengan gaya.</p>
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-indigo-100 selection:text-indigo-900">
+      {/* Left Side: Visual / Hero */}
+      <div className="hidden lg:block relative overflow-hidden bg-slate-950">
+        <div className="absolute inset-0 opacity-40">
+          <img 
+            src="https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=1974" 
+            alt="Shoe store luxury" 
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
         </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+        <div className="absolute bottom-20 left-20 right-20">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            <div className="flex items-center gap-3 mb-8">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center rotate-3 shadow-2xl shadow-indigo-500/50">
+                <ShoppingBag className="text-white w-6 h-6" />
+              </div>
+              <span className="font-black text-3xl tracking-tighter text-white uppercase italic">SOLEFLOW.</span>
+            </div>
+            <h2 className="text-6xl font-black text-white leading-tight tracking-tighter mb-6">DEFINE YOUR <br/> <span className="text-indigo-500 italic">STYLE.</span></h2>
+            <p className="text-slate-400 text-lg max-w-md font-medium leading-relaxed">
+              Bergabunglah dengan komunitas SoleFlow dan dapatkan akses eksklusif ke koleksi sepatu premium terbaik dunia.
+            </p>
+          </motion.div>
+        </div>
+      </div>
 
-        <motion.div 
-          layout
-          className="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl shadow-slate-200/50"
-        >
-          <div className="flex bg-slate-100 p-1 rounded-xl mb-8">
-            <button 
-              onClick={() => setIsLogin(true)}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Masuk
-            </button>
-            <button 
-              onClick={() => setIsLogin(false)}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-            >
-              Daftar
-            </button>
+      {/* Right Side: Auth Form */}
+      <div className="flex items-center justify-center p-8 lg:p-24 bg-slate-50/50">
+        <div className="w-full max-w-md space-y-12">
+          <div className="lg:hidden text-center">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-indigo-600 rounded-2xl shadow-xl shadow-indigo-200 mb-6 rotate-3">
+              <ShoppingBag className="text-white w-7 h-7" />
+            </div>
+            <h1 className="text-3xl font-black tracking-tighter text-slate-950 leading-none">SOLEFLOW.</h1>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {!isLogin && (
-              <>
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Nama Lengkap</label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                    <input 
-                      required
-                      type="text" 
-                      placeholder="Masukkan nama Anda"
-                      className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                      value={formData.name}
-                      onChange={e => setFormData({...formData, name: e.target.value})}
-                    />
+          <div className="space-y-2">
+            <h3 className="text-4xl font-extrabold text-slate-950 tracking-tighter">
+              {isLogin ? 'Hello, Welcome Back.' : 'Ready to Start?'}
+            </h3>
+            <p className="text-slate-500 font-medium">
+              {isLogin ? 'Masukkan detail akun Anda di bawah ini.' : 'Buat akun SoleFlow Anda sekarang.'}
+            </p>
+          </div>
+
+          <motion.div layout>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {!isLogin && (
+                <div className="grid grid-cols-1 gap-6 animate-in fade-in slide-in-from-top-4 duration-500">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Full Name</label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                      <input 
+                        required
+                        type="text" 
+                        placeholder="John Doe"
+                        className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-[1.5rem] focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-medium text-slate-950"
+                        value={formData.name}
+                        onChange={e => setFormData({...formData, name: e.target.value})}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Account Category</label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, role: 'customer'})}
+                        className={`py-4 text-[11px] font-black uppercase tracking-widest rounded-2xl border-2 transition-all ${formData.role === 'customer' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-lg shadow-indigo-500/10' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+                      >
+                        Member
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setFormData({...formData, role: 'admin'})}
+                        className={`py-4 text-[11px] font-black uppercase tracking-widest rounded-2xl border-2 transition-all ${formData.role === 'admin' ? 'bg-indigo-50 border-indigo-600 text-indigo-700 shadow-lg shadow-indigo-500/10' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-200'}`}
+                      >
+                        Retailer
+                      </button>
+                    </div>
                   </div>
                 </div>
-
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Daftar Sebagai</label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      type="button"
-                      onClick={() => setFormData({...formData, role: 'customer'})}
-                      className={`py-2.5 text-xs font-bold rounded-xl border transition-all ${formData.role === 'customer' ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-500'}`}
-                    >
-                      Customer
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => setFormData({...formData, role: 'admin'})}
-                      className={`py-2.5 text-xs font-bold rounded-xl border transition-all ${formData.role === 'admin' ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-500'}`}
-                    >
-                      Admin
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Email</label>
-              <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  required
-                  type="email" 
-                  placeholder="email@contoh.com"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                  value={formData.email}
-                  onChange={e => setFormData({...formData, email: e.target.value})}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-widest">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  required
-                  type="password" 
-                  placeholder="••••••••"
-                  className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all"
-                  value={formData.password}
-                  onChange={e => setFormData({...formData, password: e.target.value})}
-                />
-              </div>
-            </div>
-
-            {error && (
-              <p className="text-xs font-bold text-red-500 bg-red-50 p-3 rounded-xl border border-red-100">
-                {error}
-              </p>
-            )}
-
-            <button 
-              disabled={loading}
-              type="submit"
-              className="w-full py-4 bg-indigo-600 text-white rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 disabled:opacity-50"
-            >
-              {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
-                <>
-                  {isLogin ? 'Masuk' : 'Daftar Sekarang'}
-                  <ArrowRight className="w-5 h-5" />
-                </>
               )}
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Work Email</label>
+                <div className="relative">
+                  <Mail className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <input 
+                    required
+                    type="email" 
+                    placeholder="email@example.com"
+                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-[1.5rem] focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-medium text-slate-950"
+                    value={formData.email}
+                    onChange={e => setFormData({...formData, email: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-300" />
+                  <input 
+                    required
+                    type="password" 
+                    placeholder="••••••••"
+                    className="w-full pl-14 pr-6 py-4 bg-white border border-slate-200 rounded-[1.5rem] focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-medium text-slate-950"
+                    value={formData.password}
+                    onChange={e => setFormData({...formData, password: e.target.value})}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-red-50 rounded-2xl border border-red-100 flex items-center gap-3 text-red-600 text-xs font-bold"
+                >
+                  <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  {error}
+                </motion.div>
+              )}
+
+              <button 
+                disabled={loading}
+                type="submit"
+                className="w-full py-5 bg-slate-950 text-white rounded-[2rem] font-black text-xs uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-indigo-600 transition-all shadow-2xl shadow-indigo-500/10 active:scale-95 disabled:opacity-50"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : (
+                  <>
+                    {isLogin ? 'Sign In Now' : 'Create Account'}
+                    <ArrowRight className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
+          </motion.div>
+
+          <div className="flex items-center gap-4">
+            <div className="h-px bg-slate-100 flex-1" />
+            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">or</span>
+            <div className="h-px bg-slate-100 flex-1" />
+          </div>
+
+          <div className="text-center">
+            <button 
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm font-bold text-slate-500 hover:text-indigo-600 transition-colors"
+            >
+              {isLogin ? 'Don\'t have an account? Join SoleFlow' : 'Already a member? Sign In'}
             </button>
-          </form>
+          </div>
 
           {isLogin && (
-            <div className="mt-8 pt-8 border-t border-slate-100 text-center">
-              <p className="text-sm text-slate-500">Akun Demo:</p>
-              <div className="mt-2 space-y-1 text-xs font-mono text-slate-400">
-                <p>Admin: admin@soleflow.com / admin</p>
-                <p>User: customer@gmail.com / user123</p>
+            <div className="p-8 bg-slate-100/50 rounded-[2rem] border border-slate-200/50 text-center">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Demo Access</p>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs px-2">
+                  <span className="font-bold text-slate-500">ADMIN</span>
+                  <span className="font-black text-slate-900 tracking-tight">admin@soleflow.com / admin</span>
+                </div>
+                <div className="flex justify-between items-center text-xs px-2">
+                  <span className="font-bold text-slate-500">MEMBER</span>
+                  <span className="font-black text-slate-900 tracking-tight">customer@gmail.com / user123</span>
+                </div>
               </div>
             </div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
