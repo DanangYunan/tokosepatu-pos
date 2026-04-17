@@ -93,7 +93,7 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
   const handleWhatsAppCheckout = () => {
     if (cart.length === 0) return;
 
-    const phoneNumber = "6282133445566"; // Ganti dengan nomor WhatsApp admin Anda
+    const phoneNumber = "6285157720367"; // Nomor WhatsApp admin SoleFlow
     const message = `Halo SoleFlow! Saya ingin memesan sepatu berikut:
 
 *Detail Pesanan:*
