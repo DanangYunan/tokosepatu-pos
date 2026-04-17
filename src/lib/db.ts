@@ -169,6 +169,14 @@ export async function seedDatabase() {
     ]);
   }
 
+  // Migration: ensure sellingPrice exists for old products
+  const allProducts = await db.products.toArray();
+  for (const p of allProducts) {
+    if (p.sellingPrice === undefined || p.sellingPrice === null || isNaN(p.sellingPrice)) {
+      await db.products.update(p.id!, { sellingPrice: (p.sellingPrice || (p.purchasePrice * 1.2)) });
+    }
+  }
+
   // Seed Admin User
   const userCount = await db.users.count();
   if (userCount === 0) {
