@@ -5,7 +5,8 @@ export interface Product {
   name: string;
   brand: string;
   category: string;
-  price: number;
+  purchasePrice: number;
+  sellingPrice: number;
   stock: number;
   size: string;
   sku: string;
@@ -13,19 +14,35 @@ export interface Product {
   createdAt: number;
 }
 
+export interface AppSettings {
+  id?: number;
+  appName: string;
+  appLogo?: string;
+  marginType: 'percentage' | 'nominal';
+  marginValue: number;
+  updatedAt: number;
+}
+
 export interface TransactionItem {
   productId: number;
   name: string;
-  price: number;
+  price: number; // This is the selling price at the time of transaction
   quantity: number;
   subtotal: number;
+}
+
+export interface Payment {
+  method: 'cash' | 'card' | 'transfer';
+  amount: number;
 }
 
 export interface Transaction {
   id?: number;
   items: TransactionItem[];
   totalAmount: number;
-  paymentMethod: 'cash' | 'card' | 'transfer';
+  payments: Payment[];
+  totalPaid: number;
+  change: number;
   timestamp: number;
   customerName?: string;
 }
@@ -43,13 +60,15 @@ export class SoleFlowDB extends Dexie {
   products!: Table<Product>;
   transactions!: Table<Transaction>;
   users!: Table<User>;
+  settings!: Table<AppSettings>;
 
   constructor() {
     super('SoleFlowDB');
-    this.version(2).stores({
+    this.version(3).stores({
       products: '++id, name, brand, category, sku',
       transactions: '++id, timestamp, totalAmount',
-      users: '++id, email, role'
+      users: '++id, email, role',
+      settings: '++id'
     });
   }
 }
@@ -58,6 +77,17 @@ export const db = new SoleFlowDB();
 
 // Initial data for prototyping
 export async function seedDatabase() {
+  // Seed Settings
+  const settingsCount = await db.settings.count();
+  if (settingsCount === 0) {
+    await db.settings.add({
+      appName: 'SoleFlow Premium',
+      marginType: 'percentage',
+      marginValue: 20, // 20% default margin
+      updatedAt: Date.now()
+    });
+  }
+
   // Seed Products
   const productCount = await db.products.count();
   if (productCount === 0) {
@@ -66,7 +96,8 @@ export async function seedDatabase() {
         name: 'Nike Air Max 270 React',
         brand: 'Nike',
         category: 'Running',
-        price: 1850000,
+        purchasePrice: 1500000,
+        sellingPrice: 1800000,
         stock: 12,
         size: '42',
         sku: 'NK-AM270-RD',
@@ -77,7 +108,8 @@ export async function seedDatabase() {
         name: 'Adidas Ultraboost 22 Black',
         brand: 'Adidas',
         category: 'Running',
-        price: 2400000,
+        purchasePrice: 2000000,
+        sellingPrice: 2400000,
         stock: 8,
         size: '43',
         sku: 'AD-UB22-BK',
@@ -88,7 +120,8 @@ export async function seedDatabase() {
         name: 'Vans Old Skool Classic',
         brand: 'Vans',
         category: 'Casual',
-        price: 950000,
+        purchasePrice: 750000,
+        sellingPrice: 900000,
         stock: 25,
         size: '40',
         sku: 'VN-OS-CL',
@@ -99,7 +132,8 @@ export async function seedDatabase() {
         name: 'Air Jordan 1 Retro High',
         brand: 'Nike',
         category: 'Basketball',
-        price: 2800000,
+        purchasePrice: 2300000,
+        sellingPrice: 2800000,
         stock: 5,
         size: '44',
         sku: 'NK-AJ1-RED',
@@ -110,7 +144,8 @@ export async function seedDatabase() {
         name: 'New Balance 574 Grey',
         brand: 'New Balance',
         category: 'Casual',
-        price: 1450000,
+        purchasePrice: 1200000,
+        sellingPrice: 1450000,
         stock: 15,
         size: '42',
         sku: 'NB-574-GR',
@@ -121,7 +156,8 @@ export async function seedDatabase() {
         name: 'Chuck Taylor All Star',
         brand: 'Converse',
         category: 'Casual',
-        price: 750000,
+        purchasePrice: 600000,
+        sellingPrice: 750000,
         stock: 30,
         size: '41',
         sku: 'CV-CT-WH',

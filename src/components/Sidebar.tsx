@@ -5,6 +5,7 @@ import {
   ShoppingCart, 
   History, 
   FileText,
+  Settings,
   LogOut,
   ChevronRight
 } from 'lucide-react';
@@ -23,6 +24,7 @@ const menuItems = [
   { id: 'pos', label: 'Kasir / PoS', icon: ShoppingCart },
   { id: 'history', label: 'Riwayat Transaksi', icon: History },
   { id: 'reports', label: 'Laporan', icon: FileText },
+  { id: 'settings', label: 'Pengaturan', icon: Settings },
 ];
 
 export default function Sidebar({ activeTab, setActiveTab, onSwitchView, onLogout }: SidebarProps) {

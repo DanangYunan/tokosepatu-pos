@@ -94,9 +94,13 @@ export default function TransactionHistory() {
                     </div>
                   </td>
                   <td className="px-8 py-6">
-                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600">
-                      {getPaymentIcon(tx.paymentMethod)}
-                      <span>{tx.paymentMethod}</span>
+                    <div className="flex flex-wrap gap-2">
+                      {tx.payments.map((p, i) => (
+                        <div key={i} className="inline-flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-xl border border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600">
+                          {getPaymentIcon(p.method)}
+                          <span>{p.method}</span>
+                        </div>
+                      ))}
                     </div>
                   </td>
                   <td className="px-8 py-6">

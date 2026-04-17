@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, type Product, type TransactionItem, type Transaction } from '../lib/db';
-import { formatCurrency, cn } from '../lib/utils';
+import { db, type Product, type TransactionItem, type Transaction, type Payment } from '../lib/db';
+import { formatCurrency, cn, formatInputNumber, parseInputNumber } from '../lib/utils';
 import { 
   Search, 
   ShoppingCart, 
@@ -85,7 +85,7 @@ const Receipt = ({ transaction, onClose }: ReceiptProps) => {
               </div>
               <div className="flex justify-between text-xs">
                 <span>Kasir: Admin</span>
-                <span>Mode: ${transaction.paymentMethod.toUpperCase()}</span>
+                <span>Mode: Multi-Payment</span>
               </div>
             </div>
 
@@ -108,13 +108,15 @@ const Receipt = ({ transaction, onClose }: ReceiptProps) => {
                 <span>TOTAL</span>
                 <span>${formatCurrency(transaction.totalAmount)}</span>
               </div>
-              <div className="flex justify-between text-xs">
-                <span>BAYAR</span>
-                <span>${formatCurrency(transaction.customerName ? parseInt(transaction.customerName) : 0)}</span>
-              </div>
-              <div className="flex justify-between text-xs">
+              {transaction.payments.map((p, i) => (
+                <div key={i} className="flex justify-between text-xs">
+                  <span className="uppercase">{p.method}</span>
+                  <span>${formatCurrency(p.amount)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between text-xs pt-1 border-t border-slate-100 border-dotted">
                 <span>KEMBALI</span>
-                <span>${formatCurrency((transaction.customerName ? parseInt(transaction.customerName) : 0) - transaction.totalAmount)}</span>
+                <span>${formatCurrency(transaction.change)}</span>
               </div>
             </div>
 
@@ -149,9 +151,10 @@ export default function POS() {
   const products = useLiveQuery(() => db.products.toArray());
   const [cart, setCart] = useState<TransactionItem[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'transfer'>('cash');
+  const [activePaymentMethod, setActivePaymentMethod] = useState<'cash' | 'card' | 'transfer'>('cash');
   const [isSuccess, setIsSuccess] = useState(false);
-  const [paymentAmount, setPaymentAmount] = useState<string>('');
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [currentAmount, setCurrentAmount] = useState<string>('');
   const [lastTransaction, setLastTransaction] = useState<Transaction | null>(null);
 
   const filteredProducts = products?.filter(p => 
@@ -175,9 +178,9 @@ export default function POS() {
       return [...prev, {
         productId: product.id!,
         name: product.name,
-        price: product.price,
+        price: product.sellingPrice,
         quantity: 1,
-        subtotal: product.price
+        subtotal: product.sellingPrice
       }];
     });
   };
@@ -199,23 +202,36 @@ export default function POS() {
   };
 
   const total = cart.reduce((acc, curr) => acc + curr.subtotal, 0);
-  const change = Math.max(0, (parseInt(paymentAmount) || 0) - total);
+  const totalPaid = payments.reduce((acc, curr) => acc + curr.amount, 0);
+  const remaining = Math.max(0, total - totalPaid);
+  const change = Math.max(0, totalPaid - total);
+
+  const addPayment = () => {
+    const amount = parseInputNumber(currentAmount);
+    if (amount <= 0) return;
+    
+    setPayments(prev => [...prev, { method: activePaymentMethod, amount }]);
+    setCurrentAmount('');
+  };
+
+  const removePayment = (index: number) => {
+    setPayments(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleCheckout = async () => {
     if (cart.length === 0) return;
-    
-    const paymentVal = parseInt(paymentAmount) || 0;
-    if (paymentMethod === 'cash' && paymentVal < total) {
-      alert('Total payment is insufficient!');
+    if (totalPaid < total) {
+      alert('Pembayaran belum mencukupi!');
       return;
     }
 
     const transaction: Transaction = {
       items: cart,
       totalAmount: total,
-      paymentMethod,
+      payments,
+      totalPaid,
+      change,
       timestamp: Date.now(),
-      customerName: paymentMethod === 'cash' ? paymentAmount : total.toString()
     };
 
     // Update stock
@@ -231,7 +247,8 @@ export default function POS() {
     const id = await db.transactions.add(transaction);
     setLastTransaction({ ...transaction, id });
     setCart([]);
-    setPaymentAmount('');
+    setPayments([]);
+    setCurrentAmount('');
     setIsSuccess(true);
     setTimeout(() => setIsSuccess(false), 3000);
   };
@@ -274,7 +291,7 @@ export default function POS() {
                 <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em]">{product.brand}</p>
                 <h4 className="font-extrabold text-slate-950 truncate uppercase italic tracking-tight">{product.name}</h4>
                 <div className="flex items-center justify-between mt-4">
-                  <p className="font-black text-slate-950 text-lg">{formatCurrency(product.price)}</p>
+                  <p className="font-black text-slate-950 text-lg">{formatCurrency(product.sellingPrice)}</p>
                   <p className={cn(
                     "text-[10px] font-black px-3 py-1 rounded-xl uppercase tracking-widest",
                     product.stock > 5 ? "bg-emerald-50 text-emerald-600 border border-emerald-100" : "bg-amber-50 text-amber-600 border border-amber-100"
@@ -384,59 +401,91 @@ export default function POS() {
               ].map((method) => (
                 <button 
                   key={method.id}
-                  onClick={() => setPaymentMethod(method.id as any)}
+                  onClick={() => setActivePaymentMethod(method.id as any)}
                   className={cn(
                     "flex flex-col items-center gap-3 p-5 rounded-[1.5rem] border-2 transition-all group",
-                    paymentMethod === method.id 
+                    activePaymentMethod === method.id 
                       ? "bg-slate-950 border-slate-950 text-white shadow-2xl shadow-slate-200 scale-105" 
                       : "bg-white border-slate-100 text-slate-400 hover:border-slate-200"
                   )}
                 >
-                  <method.icon className={cn("w-6 h-6", paymentMethod === method.id ? "text-indigo-400" : "text-slate-300 group-hover:text-slate-400")} />
+                  <method.icon className={cn("w-6 h-6", activePaymentMethod === method.id ? "text-indigo-400" : "text-slate-300 group-hover:text-slate-400")} />
                   <span className="text-[9px] font-black uppercase tracking-widest">{method.label}</span>
                 </button>
               ))}
             </div>
           </div>
 
-          {paymentMethod === 'cash' && (
-            <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <div className="space-y-3">
-                <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Received Amount</label>
-                <div className="flex flex-wrap gap-2 mb-2">
-                  {[total, 50000, 100000, 200000].map(amt => (
-                    <button 
-                      key={amt}
-                      type="button"
-                      onClick={() => setPaymentAmount(amt.toString())}
-                      className="px-4 py-2 text-[9px] font-black uppercase tracking-widest bg-white border border-slate-100 rounded-xl hover:bg-slate-950 hover:text-white transition-all shadow-sm"
-                    >
-                      {amt === total ? 'Uang Pas' : formatCurrency(amt)}
-                    </button>
-                  ))}
-                </div>
-                <input 
-                  type="number" 
-                  placeholder="Enter amount..."
-                  className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none font-black text-2xl tracking-tight text-slate-950"
-                  value={paymentAmount}
-                  onChange={(e) => setPaymentAmount(e.target.value)}
-                />
+          <div className="space-y-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="space-y-3">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Received Amount</label>
+              <div className="flex flex-wrap gap-2 mb-2">
+                {[remaining, 50000, 100000, 200000].map(amt => (
+                  <button 
+                    key={amt}
+                    type="button"
+                    onClick={() => setCurrentAmount(amt.toString())}
+                    className="px-4 py-2 text-[9px] font-black uppercase tracking-widest bg-white border border-slate-100 rounded-xl hover:bg-slate-950 hover:text-white transition-all shadow-sm"
+                  >
+                    {amt === remaining ? 'Uang Pas' : formatCurrency(amt)}
+                  </button>
+                ))}
               </div>
-              <div className="flex justify-between items-center px-6 py-5 bg-white rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden group">
-                <div className="absolute left-0 top-0 w-1 h-full bg-indigo-500" />
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Change Return</span>
-                <span className="font-black text-xl text-indigo-600 tracking-tight">{formatCurrency(change)}</span>
+              <div className="flex gap-2">
+                <input 
+                  type="text" 
+                  placeholder="Enter amount..."
+                  className="flex-1 px-6 py-4 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none font-black text-2xl tracking-tight text-slate-950"
+                  value={formatInputNumber(currentAmount)}
+                  onChange={(e) => setCurrentAmount(e.target.value)}
+                />
+                <button 
+                  onClick={addPayment}
+                  disabled={!currentAmount || parseInputNumber(currentAmount) <= 0}
+                  className="px-6 bg-slate-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-600 transition-all disabled:opacity-50"
+                >
+                  Add
+                </button>
               </div>
             </div>
-          )}
+
+            {payments.length > 0 && (
+              <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
+                {payments.map((p, i) => (
+                  <div key={i} className="flex justify-between items-center px-4 py-3 bg-white rounded-xl border border-slate-100 text-[10px] font-bold">
+                    <div className="flex items-center gap-2">
+                      <span className="uppercase text-indigo-600">{p.method}</span>
+                      <span className="text-slate-950">{formatCurrency(p.amount)}</span>
+                    </div>
+                    <button onClick={() => removePayment(i)} className="text-red-400 hover:text-red-600">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-1 px-5 py-4 bg-white rounded-2xl border border-slate-100 shadow-sm">
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Paid</span>
+                <span className="font-black text-lg text-slate-950 tracking-tight">{formatCurrency(totalPaid)}</span>
+              </div>
+              <div className="flex flex-col gap-1 px-5 py-4 bg-white rounded-2xl border border-slate-100 shadow-sm relative overflow-hidden">
+                <div className={cn("absolute left-0 top-0 w-1 h-full", remaining > 0 ? "bg-amber-500" : "bg-emerald-500")} />
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{remaining > 0 ? 'Remaining' : 'Change'}</span>
+                <span className={cn("font-black text-lg tracking-tight", remaining > 0 ? "text-amber-600" : "text-emerald-600")}>
+                  {remaining > 0 ? formatCurrency(remaining) : formatCurrency(change)}
+                </span>
+              </div>
+            </div>
+          </div>
 
           <button 
-            disabled={cart.length === 0 || (paymentMethod === 'cash' && (parseInt(paymentAmount) || 0) < total)}
+            disabled={cart.length === 0 || totalPaid < total}
             onClick={handleCheckout}
             className={cn(
               "w-full py-5 rounded-[2rem] font-black text-[11px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3 shadow-2xl active:scale-95",
-              cart.length > 0 && (paymentMethod !== 'cash' || (parseInt(paymentAmount) || 0) >= total)
+              cart.length > 0 && totalPaid >= total
                 ? "bg-indigo-600 text-white hover:bg-slate-950 shadow-indigo-100" 
                 : "bg-slate-200 text-slate-400 cursor-not-allowed"
             )}

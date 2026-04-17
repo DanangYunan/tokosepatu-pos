@@ -14,7 +14,12 @@ import {
   RotateCcw,
   Plus,
   Minus,
-  Trash2
+  Trash2,
+  LayoutDashboard,
+  Banknote,
+  CreditCard,
+  Wallet,
+  MessageCircle
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { type User as AppUser } from '../lib/db';
@@ -31,6 +36,7 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'transfer' | 'digital' | 'whatsapp'>('transfer');
 
   const categories = ['Semua', 'Running', 'Casual', 'Basketball', 'Formal'];
 
@@ -54,9 +60,9 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
       return [...prev, {
         productId: product.id!,
         name: product.name,
-        price: product.price,
+        price: product.sellingPrice,
         quantity: 1,
-        subtotal: product.price
+        subtotal: product.sellingPrice
       }];
     });
     setIsCartOpen(true);
@@ -82,6 +88,12 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
 
 *Detail Pesanan:*
 ${cart.map((item, index) => `${index + 1}. ${item.name} (${item.quantity}x) - ${formatCurrency(item.subtotal)}`).join('\n')}
+
+*Metode Pembayaran: ${
+  paymentMethod === 'cod' ? 'COD (Bayar di Tempat)' : 
+  paymentMethod === 'transfer' ? 'Transfer Bank' : 
+  paymentMethod === 'whatsapp' ? 'Manual via WhatsApp' : 'E-Wallet / QRIS'
+}*
 
 *Total Pembayaran: ${formatCurrency(cartTotal)}*
 
@@ -156,6 +168,16 @@ Terima kasih!`;
             </button>
 
             <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
+              {user.role === 'admin' && (
+                <button 
+                  onClick={onViewModeChange}
+                  className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all group flex items-center gap-2"
+                  title="Back to Admin Panel"
+                >
+                  <LayoutDashboard className="w-5 h-5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Admin</span>
+                </button>
+              )}
               <div className="text-right hidden sm:block">
                 <p className="text-[11px] font-black text-slate-900 leading-tight">{user.name.toUpperCase()}</p>
                 <button 
@@ -316,7 +338,7 @@ Terima kasih!`;
                   <div className="w-1 h-1 rounded-full bg-slate-200" />
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-xs">Size {product.size}</span>
                 </div>
-                <p className="text-2xl font-black text-slate-950 tracking-tight">{formatCurrency(product.price)}</p>
+                <p className="text-2xl font-black text-slate-950 tracking-tight">{formatCurrency(product.sellingPrice)}</p>
               </div>
             </motion.div>
           ))}
@@ -523,13 +545,53 @@ Terima kasih!`;
                     <span className="text-5xl font-extrabold tracking-tighter italic">{formatCurrency(cartTotal)}</span>
                   </div>
                 </div>
+
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Select Payment Method</p>
+                  <div className="grid grid-cols-1 gap-2">
+                    {[
+                      { id: 'cod', label: 'COD (Bayar di Tempat)', icon: Banknote, desc: 'Bayar saat barang sampai' },
+                      { id: 'transfer', label: 'Transfer Bank', icon: CreditCard, desc: 'BCA, Mandiri, BNI, BRI' },
+                      { id: 'digital', label: 'E-Wallet / QRIS', icon: Wallet, desc: 'GoPay, OVO, Dana, ShopeePay' },
+                      { id: 'whatsapp', label: 'Manual WhatsApp', icon: MessageCircle, desc: 'Konfirmasi via Chat Admin' },
+                    ].map((method) => (
+                      <button 
+                        key={method.id}
+                        onClick={() => setPaymentMethod(method.id as any)}
+                        className={cn(
+                          "w-full flex items-center gap-4 p-4 rounded-2xl border-2 transition-all text-left group",
+                          paymentMethod === method.id 
+                            ? "bg-white border-white text-slate-950 shadow-xl" 
+                            : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
+                        )}
+                      >
+                        <div className={cn(
+                          "w-10 h-10 rounded-xl flex items-center justify-center transition-colors",
+                          paymentMethod === method.id ? "bg-indigo-600 text-white" : "bg-slate-800 text-slate-500 group-hover:bg-slate-700"
+                        )}>
+                          <method.icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[11px] font-black uppercase tracking-widest">{method.label}</p>
+                          <p className="text-[9px] font-bold opacity-50 mt-0.5">{method.desc}</p>
+                        </div>
+                        <div className={cn(
+                          "w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all",
+                          paymentMethod === method.id ? "border-indigo-600 bg-indigo-600" : "border-slate-800"
+                        )}>
+                          {paymentMethod === method.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 
                 <button 
                   disabled={cart.length === 0}
                   onClick={handleWhatsAppCheckout}
                   className="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-slate-950 transition-all disabled:bg-slate-800 disabled:text-slate-600 disabled:cursor-not-allowed shadow-[0_20px_50px_rgba(79,70,229,0.3)]"
                 >
-                  Checkout via WhatsApp
+                  Konfirmasi Pesanan
                 </button>
                 
                 <div className="flex items-center justify-center gap-2 opacity-30">

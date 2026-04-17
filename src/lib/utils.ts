@@ -12,3 +12,13 @@ export function formatCurrency(amount: number) {
     minimumFractionDigits: 0,
   }).format(amount);
 }
+
+export const formatInputNumber = (val: number | string) => {
+  if (!val && val !== 0) return '';
+  const num = typeof val === 'string' ? val.replace(/\D/g, '') : val.toString();
+  return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
+export const parseInputNumber = (val: string) => {
+  return Number(val.replace(/\D/g, '')) || 0;
+};

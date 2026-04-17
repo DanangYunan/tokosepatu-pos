@@ -55,6 +55,23 @@ export default function Auth({ onLogin }: AuthProps) {
     }
   };
 
+  const handleDemoLogin = async (email: string, password: string) => {
+    setLoading(true);
+    setError('');
+    try {
+      const user = await db.users.where('email').equals(email).first();
+      if (user && user.password === password) {
+        onLogin(user);
+      } else {
+        setError('Email atau password demo salah.');
+      }
+    } catch (err) {
+      setError('Terjadi kesalahan pada demo login.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-white selection:bg-indigo-100 selection:text-indigo-900">
       {/* Left Side: Visual / Hero */}
@@ -220,17 +237,32 @@ export default function Auth({ onLogin }: AuthProps) {
           </div>
 
           {isLogin && (
-            <div className="p-8 bg-slate-100/50 rounded-[2rem] border border-slate-200/50 text-center">
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Demo Access</p>
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-xs px-2">
-                  <span className="font-bold text-slate-500">ADMIN</span>
-                  <span className="font-black text-slate-900 tracking-tight">admin@soleflow.com / admin</span>
-                </div>
-                <div className="flex justify-between items-center text-xs px-2">
-                  <span className="font-bold text-slate-500">MEMBER</span>
-                  <span className="font-black text-slate-900 tracking-tight">customer@gmail.com / user123</span>
-                </div>
+            <div className="p-8 bg-slate-900 rounded-[2.5rem] border border-slate-800 text-center shadow-2xl shadow-indigo-900/20">
+              <p className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-6">Quick Intelligence Access</p>
+              <div className="grid grid-cols-1 gap-3">
+                <button 
+                  type="button"
+                  onClick={() => handleDemoLogin('admin@soleflow.com', 'admin')}
+                  className="group flex justify-between items-center bg-slate-800/50 hover:bg-indigo-600 p-4 rounded-2xl transition-all duration-300"
+                >
+                  <div className="text-left">
+                    <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-indigo-200">System Access</span>
+                    <span className="block font-black text-white text-sm tracking-tight">Master Admin</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                </button>
+
+                <button 
+                  type="button"
+                  onClick={() => handleDemoLogin('customer@gmail.com', 'user123')}
+                  className="group flex justify-between items-center bg-slate-800/50 hover:bg-slate-700 p-4 rounded-2xl transition-all duration-300"
+                >
+                  <div className="text-left">
+                    <span className="block text-[10px] font-black text-slate-500 uppercase tracking-widest group-hover:text-slate-400">Guest Access</span>
+                    <span className="block font-black text-white text-sm tracking-tight">Premium Member</span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                </button>
               </div>
             </div>
           )}

@@ -15,6 +15,7 @@ import {
 
 export default function ProductManagement() {
   const products = useLiveQuery(() => db.products.toArray());
+  const settings = useLiveQuery(() => db.settings.toCollection().first());
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,11 +24,21 @@ export default function ProductManagement() {
     name: '',
     brand: '',
     category: 'Running',
-    price: 0,
+    purchasePrice: 0,
+    sellingPrice: 0,
     stock: 0,
     size: '',
     sku: '',
   });
+
+  const calculateSellingPrice = (purchasePrice: number) => {
+    if (!settings) return purchasePrice;
+    if (settings.marginType === 'percentage') {
+      return purchasePrice + (purchasePrice * settings.marginValue / 100);
+    } else {
+      return purchasePrice + settings.marginValue;
+    }
+  };
 
   const handleOpenModal = (product?: Product) => {
     if (product) {
@@ -35,9 +46,34 @@ export default function ProductManagement() {
       setFormData(product);
     } else {
       setEditingProduct(null);
-      setFormData({ name: '', brand: '', category: 'Running', price: 0, stock: 0, size: '', sku: '' });
+      setFormData({ 
+        name: '', 
+        brand: '', 
+        category: 'Running', 
+        purchasePrice: 0, 
+        sellingPrice: 0, 
+        stock: 0, 
+        size: '', 
+        sku: '' 
+      });
     }
     setIsModalOpen(true);
+  };
+
+  const formatInputNumber = (val: number | string) => {
+    if (!val && val !== 0) return '';
+    const num = typeof val === 'string' ? val.replace(/\D/g, '') : val.toString();
+    return num.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
+
+  const parseInputNumber = (val: string) => {
+    return Number(val.replace(/\D/g, '')) || 0;
+  };
+
+  const handlePurchasePriceChange = (val: string) => {
+    const rawValue = parseInputNumber(val);
+    const selling = calculateSellingPrice(rawValue);
+    setFormData({ ...formData, purchasePrice: rawValue, sellingPrice: selling });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,7 +147,7 @@ export default function ProductManagement() {
                 <th className="px-8 py-6">Product Details</th>
                 <th className="px-8 py-6">Reference No</th>
                 <th className="px-8 py-6">Category</th>
-                <th className="px-8 py-6">Valuation</th>
+                <th className="px-8 py-6">Buy / Sell</th>
                 <th className="px-8 py-6">Availability</th>
                 <th className="px-8 py-6 text-right">Actions</th>
               </tr>
@@ -142,8 +178,11 @@ export default function ProductManagement() {
                       {product.category}
                     </span>
                   </td>
-                  <td className="px-8 py-6 text-sm font-black text-slate-950">
-                    {formatCurrency(product.price)}
+                  <td className="px-8 py-6">
+                    <div className="flex flex-col">
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Buy: {formatCurrency(product.purchasePrice)}</span>
+                      <span className="text-sm font-black text-indigo-600 uppercase tracking-tight">Sell: {formatCurrency(product.sellingPrice)}</span>
+                    </div>
                   </td>
                   <td className="px-8 py-6">
                     <div className="flex items-center gap-2.5">
@@ -239,14 +278,25 @@ export default function ProductManagement() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Price (IDR)</label>
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Buy Price (IDR)</label>
                   <input 
                     required
-                    type="number" 
+                    type="text" 
                     placeholder="0"
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-black text-slate-950"
-                    value={formData.price}
-                    onChange={e => setFormData({...formData, price: Number(e.target.value)})}
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-black text-slate-900"
+                    value={formatInputNumber(formData.purchasePrice || 0)}
+                    onChange={e => handlePurchasePriceChange(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] ml-1">Sell Price (IDR) – Auto Computed</label>
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="0"
+                    className="w-full px-6 py-4 bg-indigo-50/30 border border-indigo-100 rounded-2xl focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-600 outline-none transition-all font-black text-indigo-600"
+                    value={formatInputNumber(formData.sellingPrice || 0)}
+                    onChange={e => setFormData({...formData, sellingPrice: parseInputNumber(e.target.value)})}
                   />
                 </div>
                 <div className="space-y-2">
