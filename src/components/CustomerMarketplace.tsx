@@ -37,6 +37,9 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'transfer' | 'digital' | 'whatsapp'>('transfer');
+  const [configProduct, setConfigProduct] = useState<Product | null>(null);
+  const [configSize, setConfigSize] = useState<string>('');
+  const [configColor, setConfigColor] = useState<string>('');
 
   const categories = ['Semua', 'Running', 'Casual', 'Basketball', 'Formal'];
 
@@ -47,12 +50,16 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
     return matchesSearch && matchesCategory;
   });
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: Product, size: string, color: string) => {
     setCart(prev => {
-      const existing = prev.find(item => item.productId === product.id);
+      const existing = prev.find(item => 
+        item.productId === product.id && 
+        item.size === size && 
+        item.color === color
+      );
       if (existing) {
         return prev.map(item => 
-          item.productId === product.id 
+          (item.productId === product.id && item.size === size && item.color === color)
             ? { ...item, quantity: item.quantity + 1, subtotal: (item.quantity + 1) * item.price }
             : item
         );
@@ -62,15 +69,18 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
         name: product.name,
         price: product.sellingPrice,
         quantity: 1,
-        subtotal: product.sellingPrice
+        subtotal: product.sellingPrice,
+        size,
+        color
       }];
     });
+    setConfigProduct(null);
     setIsCartOpen(true);
   };
 
-  const updateQuantity = (productId: number, delta: number) => {
+  const updateQuantity = (productId: number, size: string | undefined, color: string | undefined, delta: number) => {
     setCart(prev => prev.map(item => {
-      if (item.productId === productId) {
+      if (item.productId === productId && item.size === size && item.color === color) {
         const newQty = Math.max(0, item.quantity + delta);
         return { ...item, quantity: newQty, subtotal: newQty * item.price };
       }
@@ -87,7 +97,7 @@ export default function CustomerMarketplace({ onViewModeChange, onLogout, user }
     const message = `Halo SoleFlow! Saya ingin memesan sepatu berikut:
 
 *Detail Pesanan:*
-${cart.map((item, index) => `${index + 1}. ${item.name} (${item.quantity}x) - ${formatCurrency(item.subtotal)}`).join('\n')}
+${cart.map((item, index) => `${index + 1}. ${item.name} [Size: ${item.size || '-'}, Color: ${item.color || '-'}] (${item.quantity}x) - ${formatCurrency(item.subtotal)}`).join('\n')}
 
 *Metode Pembayaran: ${
   paymentMethod === 'cod' ? 'COD (Bayar di Tempat)' : 
@@ -318,10 +328,14 @@ Terima kasih!`;
                 </div>
                 
                 <button 
-                  onClick={() => addToCart(product)}
+                  onClick={() => {
+                    setConfigProduct(product);
+                    setConfigSize(product.size);
+                    setConfigColor('Original');
+                  }}
                   className="absolute bottom-8 left-8 right-8 bg-white text-slate-950 py-5 rounded-3xl font-black text-[10px] uppercase tracking-widest translate-y-20 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-[400ms] shadow-2xl hover:bg-slate-950 hover:text-white"
                 >
-                  Add to Cart
+                  Configure & Add
                 </button>
               </div>
               
@@ -432,8 +446,108 @@ Terima kasih!`;
         </div>
       </footer>
 
-      {/* Cart Drawer - Premium UI */}
+      {/* Modals & Overlays */}
       <AnimatePresence>
+        {configProduct && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setConfigProduct(null)}
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-lg bg-white rounded-[3rem] overflow-hidden shadow-2xl"
+            >
+              <div className="relative h-64 bg-slate-100">
+                <img 
+                  src={configProduct.imageUrl} 
+                  alt={configProduct.name} 
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+                <button 
+                  onClick={() => setConfigProduct(null)}
+                  className="absolute top-6 right-6 p-3 bg-white/90 backdrop-blur-xl rounded-2xl hover:bg-white transition-all shadow-lg"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <div className="p-10 space-y-8">
+                <div>
+                  <h3 className="text-3xl font-black text-slate-950 leading-tight uppercase italic">{configProduct.name}</h3>
+                  <p className="text-indigo-600 font-black text-xl mt-1">{formatCurrency(configProduct.sellingPrice)}</p>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pilih Ukuran</span>
+                    <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">Size Guide</span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {['38', '39', '40', '41', '42', '43', '44', '45'].map(size => (
+                      <button 
+                        key={size}
+                        onClick={() => setConfigSize(size)}
+                        className={cn(
+                          "w-12 h-12 rounded-xl flex items-center justify-center text-xs font-black transition-all",
+                          configSize === size 
+                            ? "bg-slate-900 text-white shadow-lg shadow-slate-200" 
+                            : "bg-slate-50 text-slate-400 hover:bg-slate-100"
+                        )}
+                      >
+                        {size}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Pilih Warna</span>
+                  <div className="flex flex-wrap gap-3">
+                    {[
+                      { name: 'Original', class: 'bg-slate-200' },
+                      { name: 'Stealth Black', class: 'bg-slate-950' },
+                      { name: 'Pure White', class: 'bg-white border border-slate-200' },
+                      { name: 'Crimson Red', class: 'bg-red-600' },
+                      { name: 'Royal Blue', class: 'bg-blue-600' }
+                    ].map(color => (
+                      <button 
+                        key={color.name}
+                        onClick={() => setConfigColor(color.name)}
+                        className={cn(
+                          "px-4 py-2.5 rounded-xl border-2 flex items-center gap-2 transition-all group",
+                          configColor === color.name 
+                            ? "border-indigo-600 bg-indigo-50" 
+                            : "border-slate-100 hover:border-slate-200"
+                        )}
+                      >
+                        <div className={cn("w-3 h-3 rounded-full shadow-sm", color.class)} />
+                        <span className={cn(
+                          "text-[10px] font-black uppercase tracking-widest",
+                          configColor === color.name ? "text-indigo-600" : "text-slate-500"
+                        )}>{color.name}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <button 
+                  onClick={() => addToCart(configProduct, configSize, configColor)}
+                  className="w-full bg-indigo-600 text-white py-6 rounded-3xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-950 transition-all shadow-xl shadow-indigo-100"
+                >
+                  Confirm & Add to Bag
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
         {isCartOpen && (
           <>
             <motion.div 
@@ -486,27 +600,30 @@ Terima kasih!`;
                       />
                     </div>
                     <div className="flex-1 min-w-0 flex flex-col justify-between py-2">
-                      <div className="space-y-1">
-                        <div className="flex justify-between items-start gap-4">
-                          <h4 className="font-extrabold text-xl text-slate-950 leading-tight truncate uppercase italic">{item.name}</h4>
-                          <button onClick={() => updateQuantity(item.productId, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5"/></button>
-                        </div>
-                        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{products?.find(p => p.id === item.productId)?.brand}</p>
-                        <p className="text-lg font-black text-indigo-600 mt-2">{formatCurrency(item.price)}</p>
-                      </div>
-                      <div className="flex items-center justify-between mt-6 bg-slate-50 p-2 rounded-2xl">
-                        <div className="flex items-center gap-6 px-4">
-                          <button onClick={() => updateQuantity(item.productId, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
-                            <Minus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
-                          </button>
-                          <span className="text-sm font-black w-4 text-center">{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.productId, 1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
-                            <Plus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
-                          </button>
-                        </div>
-                        <span className="text-sm font-black pr-4 text-slate-400">SUBTOTAL: {formatCurrency(item.subtotal)}</span>
-                      </div>
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-start gap-4">
+                      <h4 className="font-extrabold text-xl text-slate-950 leading-tight truncate uppercase italic">{item.name}</h4>
+                      <button onClick={() => updateQuantity(item.productId, item.size, item.color, -item.quantity)} className="text-slate-300 hover:text-red-500 transition-colors"><Trash2 className="w-5 h-5"/></button>
                     </div>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[9px] font-black text-slate-500 uppercase">Size: {item.size}</span>
+                      <span className="px-2 py-0.5 bg-slate-100 rounded text-[9px] font-black text-slate-500 uppercase">Color: {item.color}</span>
+                    </div>
+                    <p className="text-lg font-black text-indigo-600 mt-2">{formatCurrency(item.price)}</p>
+                  </div>
+                  <div className="flex items-center justify-between mt-6 bg-slate-50 p-2 rounded-2xl">
+                    <div className="flex items-center gap-6 px-4">
+                      <button onClick={() => updateQuantity(item.productId, item.size, item.color, -1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
+                        <Minus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
+                      </button>
+                      <span className="text-sm font-black w-4 text-center">{item.quantity}</span>
+                      <button onClick={() => updateQuantity(item.productId, item.size, item.color, 1)} className="w-8 h-8 flex items-center justify-center bg-white border border-slate-200 rounded-xl hover:text-indigo-600 transition-all font-bold group">
+                        <Plus className="w-3 h-3 group-hover:scale-125 transition-transform"/>
+                      </button>
+                    </div>
+                    <span className="text-sm font-black pr-4 text-slate-400">SUBTOTAL: {formatCurrency(item.subtotal)}</span>
+                  </div>
+                </div>
                   </motion.div>
                 ))}
                 

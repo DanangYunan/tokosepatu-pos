@@ -29,6 +29,8 @@ export interface TransactionItem {
   price: number; // This is the selling price at the time of transaction
   quantity: number;
   subtotal: number;
+  size?: string;
+  color?: string;
 }
 
 export interface Payment {
