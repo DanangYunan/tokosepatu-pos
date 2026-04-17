@@ -79,11 +79,11 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="space-y-10 pb-10">
+    <div className="space-y-6 lg:space-y-10 pb-10">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-black text-slate-950 tracking-tight">Overview</h2>
-          <p className="text-slate-500 font-medium mt-1">Real-time performance metrics for SoleFlow Store.</p>
+          <h2 className="text-2xl lg:text-3xl font-black text-slate-950 tracking-tight">Overview</h2>
+          <p className="text-slate-500 text-xs lg:text-sm font-medium mt-1">Real-time performance metrics for SoleFlow Store.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 shadow-sm">
@@ -115,9 +115,9 @@ export default function Dashboard() {
         ))}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+        <div className="lg:col-span-2 bg-white p-6 lg:p-10 rounded-3xl lg:rounded-[2.5rem] border border-slate-100 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 lg:mb-10">
             <div>
               <h3 className="font-black text-xl text-slate-950 uppercase italic tracking-tighter">Sales Performance</h3>
               <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Weekly Revenue Analysis</p>
@@ -177,8 +177,8 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="bg-white p-10 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
-          <div className="mb-10">
+        <div className="bg-white p-6 lg:p-10 rounded-3xl lg:rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col">
+          <div className="mb-8 lg:mb-10">
             <h3 className="font-black text-xl text-slate-950 uppercase italic tracking-tighter">Top Sellers</h3>
             <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Best Performing Items</p>
           </div>

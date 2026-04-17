@@ -15,6 +15,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [viewMode, setViewMode] = useState<'admin' | 'customer'>('admin');
   const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
     seedDatabase();
@@ -72,18 +73,29 @@ export default function App() {
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="flex min-h-screen bg-slate-50 relative overflow-x-hidden">
       <Sidebar 
         activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        onSwitchView={() => setViewMode('customer')} 
+        setActiveTab={(tab) => {
+          setActiveTab(tab);
+          setIsSidebarOpen(false);
+        }}
+        onSwitchView={() => {
+          setViewMode('customer');
+          setIsSidebarOpen(false);
+        }}
         onLogout={handleLogout}
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
       />
       
       <div className="flex-1 flex flex-col min-w-0">
-        <Header user={currentUser} />
+        <Header 
+          user={currentUser} 
+          onMenuClick={() => setIsSidebarOpen(true)} 
+        />
         
-        <main className="p-8 flex-1 overflow-y-auto">
+        <main className="p-4 lg:p-8 flex-1 overflow-y-auto">
           <div className="max-w-7xl mx-auto">
             {renderContent()}
           </div>

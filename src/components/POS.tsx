@@ -254,7 +254,7 @@ export default function POS() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 h-[calc(100vh-12rem)] pb-6">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 h-auto lg:h-[calc(100vh-12rem)] pb-6 px-0">
       {/* Product Selection */}
       <div className="flex-1 flex flex-col gap-8 overflow-hidden">
         <div className="relative">

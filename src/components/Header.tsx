@@ -1,16 +1,24 @@
 import React from 'react';
-import { Search, Bell, User } from 'lucide-react';
+import { Search, Bell, User, Menu } from 'lucide-react';
 import { type User as AppUser } from '../lib/db';
 
 interface HeaderProps {
   user: AppUser;
+  onMenuClick: () => void;
 }
 
-export default function Header({ user }: HeaderProps) {
+export default function Header({ user, onMenuClick }: HeaderProps) {
   return (
-    <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-50 px-10 flex items-center justify-between sticky top-0 z-40 transition-all">
+    <header className="h-24 bg-white/80 backdrop-blur-md border-b border-slate-50 px-6 lg:px-10 flex items-center justify-between sticky top-0 z-40 transition-all">
       <div className="flex items-center gap-6 flex-1 max-w-2xl">
-        <div className="relative w-full group">
+        <button 
+          onClick={onMenuClick}
+          className="lg:hidden p-3 text-slate-500 hover:bg-slate-50 rounded-2xl transition-all"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        <div className="relative w-full group hidden sm:block">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
           <input 
             type="text" 

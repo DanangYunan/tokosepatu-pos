@@ -7,15 +7,19 @@ import {
   FileText,
   Settings,
   LogOut,
-  ChevronRight
+  ChevronRight,
+  X
 } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { motion, AnimatePresence } from 'motion/react';
 
 interface SidebarProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   onSwitchView: () => void;
   onLogout: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const menuItems = [
@@ -27,19 +31,22 @@ const menuItems = [
   { id: 'settings', label: 'Pengaturan', icon: Settings },
 ];
 
-export default function Sidebar({ activeTab, setActiveTab, onSwitchView, onLogout }: SidebarProps) {
-  return (
-    <aside className="w-64 bg-slate-950 text-white h-screen flex flex-col sticky top-0">
-      <div className="p-8">
+export default function Sidebar({ activeTab, setActiveTab, onSwitchView, onLogout, isOpen, onClose }: SidebarProps) {
+  const content = (
+    <div className="flex flex-col h-full bg-slate-950 text-white w-64">
+      <div className="p-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 bg-indigo-600 rounded-xl flex items-center justify-center rotate-3">
             <Package className="text-white w-5 h-5" />
           </div>
           <h1 className="font-black text-2xl tracking-tighter italic">SOLEFLOW.</h1>
         </div>
+        <button onClick={onClose} className="lg:hidden p-2 text-slate-500 hover:text-white">
+          <X className="w-6 h-6" />
+        </button>
       </div>
 
-      <nav className="flex-1 px-4 space-y-1.5">
+      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto">
         <div className="px-4 mb-4">
           <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Main Menu</p>
         </div>
@@ -89,6 +96,39 @@ export default function Sidebar({ activeTab, setActiveTab, onSwitchView, onLogou
           <span>Sign Out</span>
         </button>
       </div>
-    </aside>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 bg-slate-950 text-white h-screen flex-col sticky top-0">
+        {content}
+      </aside>
+
+      {/* Mobile Sidebar */}
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 bg-slate-950/60 backdrop-blur-sm z-[100] lg:hidden"
+            />
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+              className="fixed top-0 left-0 h-full z-[110] lg:hidden shadow-2xl"
+            >
+              {content}
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

@@ -125,14 +125,14 @@ Terima kasih!`;
       </div>
 
       {/* Navbar */}
-      <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-xl border-b border-slate-100/50">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-12">
+      <nav className="sticky top-0 z-[60] bg-white/80 backdrop-blur-xl border-b border-slate-100/50 flex flex-col lg:block">
+        <div className="max-w-7xl mx-auto px-4 lg:px-6 h-20 flex items-center justify-between">
+          <div className="flex items-center gap-4 lg:gap-12">
             <div className="flex items-center gap-2 group cursor-pointer" onClick={() => setSelectedCategory('Semua')}>
               <div className="w-10 h-10 bg-indigo-600 rounded-2xl flex items-center justify-center rotate-3 group-hover:rotate-0 transition-transform duration-500 shadow-lg shadow-indigo-200">
                 <ShoppingBag className="text-white w-5 h-5" />
               </div>
-              <span className="font-extrabold text-2xl tracking-tighter">SOLEFLOW.</span>
+              <span className="font-extrabold text-xl lg:text-2xl tracking-tighter">SOLEFLOW.</span>
             </div>
             
             <div className="hidden lg:flex items-center gap-8">
@@ -153,43 +153,43 @@ Terima kasih!`;
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="relative hidden xl:block group">
+          <div className="flex items-center gap-2 lg:gap-6">
+            <div className="relative hidden md:block group">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-600 transition-colors" />
               <input 
                 type="text" 
                 placeholder="Cari koleksi terbaik..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-12 pr-6 py-3 bg-slate-100 border-2 border-transparent rounded-2xl text-xs w-72 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
+                className="pl-12 pr-6 py-3 bg-slate-100 border-2 border-transparent rounded-2xl text-xs w-48 lg:w-72 focus:bg-white focus:border-indigo-100 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all"
               />
             </div>
             
             <button 
               onClick={() => setIsCartOpen(true)}
-              className="relative p-3 text-slate-700 hover:bg-slate-100 rounded-2xl transition-all group"
+              className="relative p-2.5 lg:p-3 text-slate-700 hover:bg-slate-100 rounded-2xl transition-all group"
             >
-              <ShoppingBag className="w-6 h-6 group-hover:scale-110 transition-transform" />
+              <ShoppingBag className="w-5 h-5 lg:w-6 lg:h-6 group-hover:scale-110 transition-transform" />
               {cart.length > 0 && (
-                <span className="absolute -top-1 -right-1 w-6 h-6 bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center rounded-xl border-2 border-white shadow-lg">
+                <span className="absolute -top-1 -right-1 w-5 h-5 lg:w-6 lg:h-6 bg-indigo-600 text-white text-[9px] lg:text-[10px] font-black flex items-center justify-center rounded-xl border-2 border-white shadow-lg">
                   {cart.length}
                 </span>
               )}
             </button>
 
-            <div className="flex items-center gap-4 pl-6 border-l border-slate-100">
+            <div className="flex items-center gap-2 lg:gap-4 pl-3 lg:pl-6 border-l border-slate-100">
               {user.role === 'admin' && (
                 <button 
                   onClick={onViewModeChange}
-                  className="p-3 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all group flex items-center gap-2"
+                  className="p-2.5 lg:p-3 bg-slate-900 text-white rounded-2xl hover:bg-indigo-600 transition-all group flex items-center gap-2"
                   title="Back to Admin Panel"
                 >
                   <LayoutDashboard className="w-5 h-5" />
-                  <span className="text-[10px] font-black uppercase tracking-widest hidden md:block">Admin</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest hidden xl:block">Admin</span>
                 </button>
               )}
-              <div className="text-right hidden sm:block">
-                <p className="text-[11px] font-black text-slate-900 leading-tight">{user.name.toUpperCase()}</p>
+              <div className="text-right hidden md:block">
+                <p className="text-[11px] font-black text-slate-950 leading-tight uppercase italic">{user.name}</p>
                 <button 
                   onClick={onLogout}
                   className="text-[9px] font-bold text-slate-400 uppercase tracking-widest hover:text-red-500 transition-colors"
@@ -197,16 +197,46 @@ Terima kasih!`;
                   Sign Out
                 </button>
               </div>
-              <div className="w-11 h-11 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center text-slate-800 font-black border border-white shadow-sm overflow-hidden ring-2 ring-slate-50">
+              <div className="w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl lg:rounded-2xl flex items-center justify-center text-slate-800 font-black border border-white shadow-sm overflow-hidden ring-2 ring-slate-50">
                 {user.name.charAt(0)}
               </div>
             </div>
           </div>
         </div>
+        
+        {/* Mobile Search & Categories */}
+        <div className="lg:hidden px-4 pb-4 flex flex-col gap-3">
+          <div className="relative group">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input 
+              type="text" 
+              placeholder="Cari produk..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-12 pr-6 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-[11px] font-medium focus:bg-white transition-all outline-none"
+            />
+          </div>
+          <div className="flex overflow-x-auto pb-1 no-scrollbar gap-2">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={cn(
+                  "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all",
+                  selectedCategory === cat 
+                    ? "bg-slate-950 text-white shadow-lg shadow-slate-200" 
+                    : "bg-white text-slate-400 border border-slate-100 hover:border-slate-200"
+                )}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="relative h-[90vh] flex items-center overflow-hidden">
+      <section className="relative h-[85vh] lg:h-[90vh] flex items-center overflow-hidden pt-32 lg:pt-0">
         <div className="absolute inset-0 z-0">
           <img 
             src="https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&q=80&w=2070" 
@@ -228,21 +258,21 @@ Terima kasih!`;
                 <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
                 Limited Edition Drop
               </span>
-              <h1 className="text-7xl md:text-[10rem] font-extrabold text-white leading-[0.8] tracking-[-0.05em] mb-10">
+              <h1 className="text-5xl md:text-7xl lg:text-[10rem] font-extrabold text-white leading-[0.9] lg:leading-[0.8] tracking-[-0.05em] mb-8 lg:mb-10">
                 ULTIMATE <br/> <span className="text-indigo-500 italic">STYLE.</span>
               </h1>
-              <p className="text-slate-300 text-lg md:text-xl mb-12 max-w-xl leading-relaxed font-medium">
+              <p className="text-slate-300 text-base md:text-lg lg:text-xl mb-10 lg:mb-12 max-w-xl leading-relaxed font-medium">
                 Melangkah dengan penuh percaya diri. Koleksi eksklusif SoleFlow hadir untuk mendefinisikan jati diri Anda melalui kenyamanan premium.
               </p>
-              <div className="flex flex-wrap gap-6">
+              <div className="flex flex-col sm:flex-row gap-4 lg:gap-6">
                 <button 
                   onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
-                  className="group flex items-center gap-4 bg-white text-slate-950 px-10 py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-2xl shadow-indigo-500/10"
+                  className="group flex items-center justify-center gap-4 bg-white text-slate-950 px-8 lg:px-10 py-4 lg:py-5 rounded-3xl font-black text-xs uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-2xl shadow-indigo-500/10"
                 >
                   Explore Collection
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
                 </button>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center justify-center sm:justify-start gap-4">
                   <div className="flex -space-x-4">
                     {[1, 2, 3].map(i => (
                       <div key={i} className="w-12 h-12 rounded-2xl border-4 border-slate-950 bg-slate-800 flex items-center justify-center overflow-hidden">
@@ -478,10 +508,10 @@ Terima kasih!`;
                 </button>
               </div>
               
-              <div className="p-10 space-y-8">
+              <div className="p-6 lg:p-10 space-y-6 lg:space-y-8">
                 <div>
-                  <h3 className="text-3xl font-black text-slate-950 leading-tight uppercase italic">{configProduct.name}</h3>
-                  <p className="text-indigo-600 font-black text-xl mt-1">{formatCurrency(configProduct.sellingPrice)}</p>
+                  <h3 className="text-2xl lg:text-3xl font-black text-slate-950 leading-tight uppercase italic">{configProduct.name}</h3>
+                  <p className="text-indigo-600 font-black text-lg lg:text-xl mt-1">{formatCurrency(configProduct.sellingPrice)}</p>
                 </div>
 
                 <div className="space-y-4">
@@ -562,7 +592,7 @@ Terima kasih!`;
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 200 }}
-              className="fixed top-0 right-0 h-full w-full max-w-xl bg-white z-[110] shadow-[-20px_0_50px_rgba(0,0,0,0.1)] flex flex-col"
+              className="fixed top-0 right-0 h-full w-full lg:max-w-xl bg-white z-[110] shadow-[-20px_0_50px_rgba(0,0,0,0.1)] flex flex-col"
             >
               <div className="p-10 border-b border-slate-100 flex items-center justify-between">
                 <div className="flex items-center gap-4">
